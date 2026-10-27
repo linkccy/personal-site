@@ -3,7 +3,7 @@
 第七天实训产出：一个用 React + TypeScript + Vite 手写的深色主题个人主页，
 带 Canvas 星空背景、终端风 Hero、技能进度条、项目卡、踩坑笔记与联系方式。
 
-线上地址：**待部署后填写**（见下面「部署」一节）
+线上地址：**<https://linkccy.github.io/personal-site/>**（2026-10-27 由 GitHub Actions 自动发布）
 
 ---
 
@@ -20,7 +20,8 @@
 | `src/hooks/useReducedMotion.ts` | 读取系统「减少动态效果」偏好 |
 | `src/index.css` | 全部样式：设计变量、布局、动画、响应式 |
 | `.github/workflows/deploy.yml` | GitHub Actions 工作流：push 到 main 后自动构建并发布到 Pages |
-| `_tools/shot_site.py` | 用无头 Chrome 给站点拍截图（开发辅助，不参与构建） |
+| `_tools/shot_site.py` | 用无头 Chrome 给本地站点拍截图（开发辅助，不参与构建） |
+| `_tools/shot_live.py` | 给已经部署的线上地址拍截图，并打印线上页面自检信息 |
 
 > 顺序上先有需求（PRD），再有设计（TECH_DESIGN），最后才有代码 —— 这也是
 > 实训里「AI 项目开发五步流程」要求的顺序。
@@ -62,6 +63,46 @@ npx tsc --noEmit     # 只做类型检查
 ---
 
 ## 四、部署
+
+**当前状态：已上线 ✅**
+
+| 项目 | 值 |
+| --- | --- |
+| 线上地址 | <https://linkccy.github.io/personal-site/> |
+| 仓库 | <https://github.com/linkccy/personal-site> |
+| 平台 | GitHub Pages（Source = `GitHub Actions`） |
+| 发布方式 | 工作流 `Deploy to GitHub Pages`，push 到 `main` 自动触发 |
+| 首次成功运行 | run `#2`，提交 `550eaf3`（2026-10-27） |
+
+### 踩过的坑（都记在这，下次别再踩）
+
+1. **`Get Pages site failed ... Error: Not Found`** —— 第一次运行（run `#1`）卡在「配置 Pages」这一步，
+   前四步（拉代码 / 装 Node / `npm ci` / 构建）全是绿的。根因是仓库 **Settings → Pages → Source
+   还是 `Deploy from a branch`**。改成 `GitHub Actions` 后立刻成功。
+2. **`Node.js 20 is deprecated`** —— `checkout@v4`、`setup-node@v4` 这些旧版本被 GitHub 强制跑在
+   Node 24 上。已升级到 `checkout@v7` / `setup-node@v7` / `configure-pages@v6` /
+   `upload-pages-artifact@v5` / `deploy-pages@v5`，并把构建用的 Node 设为 24。
+3. **`Failed to connect to github.com:443`** —— 国内访问 GitHub 时好时坏。
+   本机 `127.0.0.1:7897` 有可用代理，一次性推送用：
+   ```powershell
+   git -c http.proxy=http://127.0.0.1:7897 -c https.proxy=http://127.0.0.1:7897 push
+   ```
+
+### 线上验证结果
+
+用 `python _tools/shot_live.py` 拍线上站点时顺便读回页面信息：
+
+```json
+{"title":"chaoyi · 个人主页","sections":["home","about","skills","projects","blog","contact"],
+ "canvas":true,"email":"linkccy04@163.com","scrollW":758,"clientW":758}
+```
+
+`canvas: true` 说明星空在跑，六个锚点区全在，`scrollW == clientW` 说明没有横向滚动。
+资源也都正常：首页 1,291 字节、`index-*.js` 173,586 字节、`index-*.css` 20,835 字节、`favicon.svg` 853 字节，全部 HTTP 200。
+
+---
+
+以下三条路线任选，路线 A 是本次实际使用的。
 
 本站是**纯静态站点**，`npm run build` 产出的 `dist/` 目录可以直接丢到任何托管平台。
 `vite.config.ts` 里设了 `base: './'`，所以放在域名根目录或子路径下都能正常加载。
