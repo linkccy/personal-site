@@ -22,6 +22,8 @@
 | `.github/workflows/deploy.yml` | GitHub Actions 工作流：push 到 main 后自动构建并发布到 Pages |
 | `_tools/shot_site.py` | 用无头 Chrome 给本地站点拍截图（开发辅助，不参与构建） |
 | `_tools/shot_live.py` | 给已经部署的线上地址拍截图，并打印线上页面自检信息 |
+| `_tools/mk_doc_shots.py` | 把三份文档的指定行范围渲染成带 VS Code 外框的图片（交 04 题用） |
+| `_tools/frame_live.py` | 把线上截图套进带地址栏的浏览器外框（交 05 题用） |
 
 > 顺序上先有需求（PRD），再有设计（TECH_DESIGN），最后才有代码 —— 这也是
 > 实训里「AI 项目开发五步流程」要求的顺序。
