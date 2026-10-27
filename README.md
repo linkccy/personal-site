@@ -1,4 +1,4 @@
-# 个人网站 · linkccy
+# 个人网站 · chaoyi
 
 第七天实训产出：一个用 React + TypeScript + Vite 手写的深色主题个人主页，
 带 Canvas 星空背景、终端风 Hero、技能进度条、项目卡、踩坑笔记与联系方式。

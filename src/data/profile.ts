@@ -20,14 +20,13 @@ export type Project = {
 };
 
 export const profile = {
-  /** TODO: 换成你的真名或昵称 */
-  name: 'linkccy',
+  /** 显示名，会用在导航 Logo、Hero 标题、页脚和终端卡片里 */
+  name: 'chaoyi',
   title: '物联网工程在读 · 大模型方向',
   school: '大连民族大学',
   major: '物联网工程',
   direction: '大模型与深度学习工程',
-  /** TODO: 换成你常用的邮箱 */
-  email: 'linkccy@example.com',
+  email: 'linkccy04@163.com',
   github: 'https://github.com/linkccy',
   location: '辽宁 · 大连',
 

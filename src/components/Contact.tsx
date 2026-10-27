@@ -86,7 +86,9 @@ export function Contact() {
                 🐙
               </span>
               <span className="contact-label">GitHub</span>
-              <span className="contact-value">github.com/linkccy</span>
+              <span className="contact-value">
+                {profile.github.replace(/^https?:\/\//, '')}
+              </span>
               <a
                 className="copy-btn"
                 href={profile.github}

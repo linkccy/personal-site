@@ -246,6 +246,25 @@ def main():
             base64.b64decode(res["data"])
         )
         print("  第七天-06-博客展开.png")
+
+        # 联系方式区：确认邮箱渲染正确
+        cdp.send(
+            "Runtime.evaluate",
+            expression="document.getElementById('contact').scrollIntoView({behavior:'instant'})",
+        )
+        time.sleep(0.6)
+        cdp.send("Runtime.evaluate", expression=FORCE_FINAL)
+        time.sleep(0.4)
+        res = cdp.send("Page.captureScreenshot", format="png", captureBeyondViewport=False)
+        open(os.path.join(OUT, "第七天-07-联系方式.png"), "wb").write(
+            base64.b64decode(res["data"])
+        )
+        email = cdp.send(
+            "Runtime.evaluate",
+            returnByValue=True,
+            expression="document.querySelector('.contact-value').textContent",
+        )
+        print("  第七天-07-联系方式.png   页面上显示的邮箱:", email["result"]["value"])
         cdp.ws.close()
     finally:
         if chrome:

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { profile } from '../data/profile';
 
 export function Footer() {
   const [showTop, setShowTop] = useState(false);
@@ -14,7 +15,7 @@ export function Footer() {
     <>
       <footer className="footer">
         <div className="wrap footer-inner">
-          <span>© 2026 linkccy · 个人主页</span>
+          <span>© 2026 {profile.name} · 个人主页</span>
           <span className="footer-tech">
             React + TypeScript + Vite 构建，星空背景为 Canvas 手写，未使用任何动效库
           </span>

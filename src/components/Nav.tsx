@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { profile } from '../data/profile';
 
 export const SECTIONS = [
   { id: 'home', label: '首页' },
@@ -56,9 +57,9 @@ export function Nav() {
       <div className="wrap nav-inner">
         <a className="logo" href="#home" aria-label="回到首页">
           <span className="logo-mark" aria-hidden="true">
-            L
+            {profile.name.slice(0, 1).toUpperCase()}
           </span>
-          <span>linkccy</span>
+          <span>{profile.name}</span>
         </a>
 
         <nav className={`nav-links ${open ? 'open' : ''}`} aria-label="主导航">
