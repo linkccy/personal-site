@@ -1,0 +1,62 @@
+# 把网站自动发布到 GitHub Pages。
+#
+# 触发方式：每次 push 到 main 分支，或者到仓库 Actions 页面手动点 Run workflow。
+# 产物：dist/ 目录，由 upload-pages-artifact 打包，deploy-pages 发布。
+#
+# 用之前记得在仓库 Settings → Pages → Source 里选「GitHub Actions」。
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# 让这个工作流有权限写 Pages、并且能拿 OIDC 令牌做部署鉴权
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同一时间只跑一个部署；如果连续 push 多次，取消排队中的旧任务
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # 用 ci 而不是 install：严格按 package-lock.json 装，保证构建可复现
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 类型检查 + 打包
+        run: npm run build
+
+      - name: 配置 Pages
+        uses: actions/configure-pages@v5
+
+      - name: 上传构建产物
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: 发布到 GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

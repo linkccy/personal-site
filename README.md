@@ -19,6 +19,7 @@
 | `src/components/` | 九个区块组件 + 两个通用组件（`Reveal` / `Starfield`） |
 | `src/hooks/useReducedMotion.ts` | 读取系统「减少动态效果」偏好 |
 | `src/index.css` | 全部样式：设计变量、布局、动画、响应式 |
+| `.github/workflows/deploy.yml` | GitHub Actions 工作流：push 到 main 后自动构建并发布到 Pages |
 | `_tools/shot_site.py` | 用无头 Chrome 给站点拍截图（开发辅助，不参与构建） |
 
 > 顺序上先有需求（PRD），再有设计（TECH_DESIGN），最后才有代码 —— 这也是
@@ -65,19 +66,35 @@ npx tsc --noEmit     # 只做类型检查
 本站是**纯静态站点**，`npm run build` 产出的 `dist/` 目录可以直接丢到任何托管平台。
 `vite.config.ts` 里设了 `base: './'`，所以放在域名根目录或子路径下都能正常加载。
 
-### 路线 A：Cloudflare Pages（推荐，免费且自带 HTTPS）
+### 路线 A（推荐）：GitHub Actions + GitHub Pages
 
-1. 先把本项目推到 GitHub（见下面「推送到 GitHub」）。
-2. 打开 <https://dash.cloudflare.com/> → 左侧 **Workers 和 Pages** → **创建** → **Pages** → **连接到 Git**。
-3. 授权 GitHub，选中刚建的仓库。
-4. 构建配置填写：
-   - 框架预设：**Vite**（若没有就选 `None`）
+不用注册任何新账号，仓库自带的 Actions 负责构建和发布。
+仓库里已经放好了工作流文件 `.github/workflows/deploy.yml`，推上去就能跑。
+
+1. 在 GitHub 建一个**空的公开仓库**（三个初始化选项一个都别勾）。
+2. 推代码（见下面「推送到 GitHub」）。
+3. 仓库 **Settings → Pages → Source** 改成 **`GitHub Actions`**
+   —— 这一步最容易漏，忘了会出现「Actions 跑绿了但网址打不开」。
+4. 仓库 **Actions** 标签里会看到 `Deploy to GitHub Pages` 在跑，1~2 分钟后变绿。
+5. 回到 **Settings → Pages**，顶部会显示 `Your site is live at https://<用户名>.github.io/<仓库名>/`。
+6. 以后每次 `git push` 到 `main` 都会自动重新构建发布。
+
+工作流做四件事：`checkout` → `setup-node`（Node 20，带 npm 缓存）→ `npm ci` → `npm run build`，
+然后把 `dist/` 通过 `upload-pages-artifact` 上传、`deploy-pages` 发布。
+用 `npm ci` 而不是 `npm install` 是为了严格按 lock 文件装依赖，保证本地和线上构建结果一致。
+
+### 路线 B：Cloudflare Pages
+
+1. 打开 <https://dash.cloudflare.com/> → 左侧 **Workers 和 Pages** → **创建** → **Pages** → **连接到 Git**。
+2. 授权 GitHub，选中刚建的仓库。
+3. 构建配置填写：
+   - 框架预设：**Vite**（选成 `None` 又不填构建命令会 404）
    - 构建命令：`npm run build`
    - 输出目录：`dist`
-5. 点 **保存并部署**，等 1~2 分钟，会得到一个 `xxx.pages.dev` 的地址。
-6. 以后每次 `git push`，它会自动重新构建部署。
+4. 点 **保存并部署**，等 1~2 分钟，会得到一个 `xxx.pages.dev` 的地址。
+5. 以后每次 `git push`，它会自动重新构建部署。
 
-### 路线 B：Vercel
+### 路线 C：Vercel
 
 1. 打开 <https://vercel.com/> → 用 GitHub 登录 → 注册时选 **Hobby**（免费）。
 2. 中途如果被要求绑定账户，选 **Skip securing my account** 跳过。
@@ -85,30 +102,26 @@ npx tsc --noEmit     # 只做类型检查
 4. Framework Preset 会自动识别为 Vite，Build Command `npm run build`、Output Directory `dist`，直接点 Deploy。
 5. 得到 `xxx.vercel.app` 地址。
 
-### 路线 C：GitHub Pages
+### 备选：手动推 gh-pages 分支
 
-1. 把项目推到 GitHub。
-2. 本地执行 `npm run build`，把生成的 `dist/` 内容推到仓库的 `gh-pages` 分支：
-   ```bash
-   npm run build
-   cd dist
-   git init -b gh-pages
-   git add -A
-   git commit -m "build: 发布 dist"
-   git remote add origin https://github.com/<你的用户名>/<仓库名>.git
-   git push -f origin gh-pages
-   ```
-3. 仓库 **Settings → Pages** → Source 选 `Deploy from a branch` → 分支选 `gh-pages`、目录选 `/ (root)` → Save。
-4. 地址形如 `https://<你的用户名>.github.io/<仓库名>/`。
-   （因为设了 `base: './'`，子路径不会 404。）
+不想用 Actions 的话，也可以把构建产物直接推到 `gh-pages` 分支：
+
+```bash
+npm run build
+cd dist
+git init -b gh-pages
+git add -A
+git commit -m "build: 发布 dist"
+git remote add origin https://github.com/<你的用户名>/<仓库名>.git
+git push -f origin gh-pages
+```
+
+然后 **Settings → Pages → Source** 选 `Deploy from a branch` → 分支 `gh-pages`、目录 `/ (root)`。
 
 ### 推送到 GitHub
 
 ```bash
 cd D:\软件开发实训\10_个人网站
-git init -b main
-git add -A
-git commit -m "feat: 个人网站 v1.0.0 — 星空主题个人主页"
 git remote add origin https://github.com/<你的用户名>/<仓库名>.git
 git push -u origin main
 ```
